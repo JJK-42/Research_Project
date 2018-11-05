@@ -35,7 +35,7 @@ Game::Game()
 
 Game::~Game()
 {
-	//delete (HexGameState*)game_state;
+	delete (HexGameState*)game_state;
 }
 
 size_t Game::get_hash() const
