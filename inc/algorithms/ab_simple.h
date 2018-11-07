@@ -8,7 +8,7 @@ class Alphabeta : public Algorithm
 	public:
 		Alphabeta();
 		
-		int run_algorithm(int argc, char** argv, Game game);
+		int run_algorithm(int argc, char** argv, Game* game);
 		
 	protected:
 		int expand(Game* game, int a, int b, int player, int depth, int& best);

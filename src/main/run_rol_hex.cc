@@ -13,6 +13,6 @@ int main(int argc, char** argv)
 	if(argc > 2)
 		seed = atoi(argv[2]);
 	Game* game = new Game(seed);
-	ab.run_algorithm(argc, argv, *game);
+	ab.run_algorithm(argc, argv, game);
 	return 0;
 }

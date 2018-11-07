@@ -8,7 +8,7 @@
 class Algorithm
 {
 	public:
-		virtual int run_algorithm(int argc, char** argv, Game game) = 0;
+		virtual int run_algorithm(int argc, char** argv, Game* game) = 0;
 		
 	protected:
 		Statistics* stats;

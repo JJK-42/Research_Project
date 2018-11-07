@@ -98,7 +98,7 @@ int Alphabeta::mt_sss(Game* game, int range, int player, int depth, int& best_mo
 	return a_r;
 }
 
-int Alphabeta::run_algorithm(int argc, char** argv, Game game)
+int Alphabeta::run_algorithm(int argc, char** argv, Game* game)
 {
 	stats->reset();
 	
@@ -119,7 +119,7 @@ int Alphabeta::run_algorithm(int argc, char** argv, Game game)
 	
 	stats->start_timer();
 	
-	Game* g = game.clone();
+	Game* g = game->clone();
 	if(argc > 4 && argv[4][0] == 'M')
 	{
 		printf("Running MT_SSS* on alpha beta.\n");
@@ -137,12 +137,12 @@ int Alphabeta::run_algorithm(int argc, char** argv, Game game)
 		printf("Outcome for player 1: %i\n", winning_val - BETA / 2);
 		printf("Best move: %i\n", best_move);
 		
-		if(game.get_nstate_estimate() < 128)
+		if(game->get_nstate_estimate() < 128)
 			stats->print_traversal();
 		stats->print_stats();
 		stats->print_ht();
 	}
 	
-	vector<int> moves = game.calc_moves();
+	vector<int> moves = game->calc_moves();
 	return moves[best_move];
 }

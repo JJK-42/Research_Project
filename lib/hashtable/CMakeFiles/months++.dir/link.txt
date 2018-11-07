@@ -1,0 +1,1 @@
+/usr/bin/c++    -std=c++11 -g   CMakeFiles/months++.dir/months.cc.o  -o months++ -rdynamic util/libcht.a util/libutil.a -lpthread -ldl 

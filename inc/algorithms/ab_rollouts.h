@@ -10,7 +10,7 @@ class Rollouts : public Algorithm
 	public:
 		Rollouts();
 		
-		int run_algorithm(int argc, char** argv, Game game);
+		int run_algorithm(int argc, char** argv, Game* game);
 		
 	private:
 		int evaluate(Game* game);

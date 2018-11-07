@@ -206,7 +206,7 @@ int Rollouts::mt_sss(Game* game, int range, int player, int depth, int& best_mov
  * to the game.h header. Prints game seed, outcome and best
  * move for player 1 (max player).
  */
-int Rollouts::run_algorithm(int argc, char** argv, Game game)
+int Rollouts::run_algorithm(int argc, char** argv, Game* game)
 {
 	stats->reset();
 	
@@ -227,7 +227,7 @@ int Rollouts::run_algorithm(int argc, char** argv, Game game)
 	
 	stats->start_timer();
 	
-	Game* g = game.clone();
+	Game* g = game->clone();
 	if(argc > 4 && argv[4][0] == 'M')
 	{
 		printf("Running MT_SSS* on rollouts alpha beta.\n");
@@ -245,12 +245,12 @@ int Rollouts::run_algorithm(int argc, char** argv, Game game)
 		printf("Outcome for player 1: %i\n", winning_val - BETA / 2);
 		printf("Best move: %i\n", best_move);
 		
-		if(game.get_nstate_estimate() < 128)
+		if(game->get_nstate_estimate() < 128)
 			stats->print_traversal();
 		stats->print_stats();
 		stats->print_ht();
 	}
 	
-	vector<int> moves = game.calc_moves();
+	vector<int> moves = game->calc_moves();
 	return moves[best_move];
 }

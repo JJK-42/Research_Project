@@ -1,0 +1,32 @@
+#IncludeRegexLine: ^[ 	]*#[ 	]*(include|import)[ 	]*[<"]([^">]+)([">])
+
+#IncludeRegexScan: ^.*$
+
+#IncludeRegexComplain: ^$
+
+#IncludeRegexTransform: 
+
+/vol/home/s1417452/Documents/RP/alpha_beta/lib/hashtable/months.c
+stdio.h
+-
+pthread.h
+-
+unistd.h
+-
+stdlib.h
+-
+string.h
+-
+util/MurmurHash3.h
+-
+util/hashtable.h
+/vol/home/s1417452/Documents/RP/alpha_beta/lib/hashtable/util/hashtable.h
+
+/vol/home/s1417452/Documents/RP/alpha_beta/lib/hashtable/util/hashtable.h
+stdint.h
+-
+
+util/MurmurHash3.h
+stdint.h
+-
+

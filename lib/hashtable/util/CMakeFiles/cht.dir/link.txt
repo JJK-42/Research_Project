@@ -1,0 +1,2 @@
+/usr/bin/ar qc libcht.a  CMakeFiles/cht.dir/hashtable.c.o
+/usr/bin/ranlib libcht.a

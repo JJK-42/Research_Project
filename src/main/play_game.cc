@@ -51,7 +51,7 @@ int get_move(int argc, char** argv, int player)
 	if(players[player] == NULL)
 		return human_move();
 	else
-		return players[player]->run_algorithm(argc, argv, *game);
+		return players[player]->run_algorithm(argc, argv, game);
 }
 
 int main(int argc, char** argv)
