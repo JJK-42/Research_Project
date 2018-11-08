@@ -9,6 +9,7 @@ class Rollouts : public Algorithm
 {
 	public:
 		Rollouts();
+		~Rollouts();
 		
 		int run_algorithm(int argc, char** argv, Game* game);
 		

@@ -51,7 +51,11 @@ int get_move(int argc, char** argv, int player)
 	if(players[player] == NULL)
 		return human_move();
 	else
-		return players[player]->run_algorithm(argc, argv, game);
+	{
+		int move = players[player]->run_algorithm(argc, argv, game);
+		players[player]->clear_bounds();
+		return move;
+	}
 }
 
 int main(int argc, char** argv)
@@ -92,5 +96,10 @@ int main(int argc, char** argv)
 		
 	play_game(argc, argv);
 	print_win_message(game->get_winner());
+	
+	for(Algorithm* player : players)
+		if(player != NULL)
+			delete player;
+	
 	return 0;
 }

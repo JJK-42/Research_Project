@@ -20,9 +20,15 @@ class Game
 		Game(const int seed);
 		
 		/**
-		 * Constructor. Creates an uninitialised game.
+		 * Constructor. Creates a game with seed 0.
 		 */
 		Game();
+		
+		/**
+		 * Constructor. Creates a game and sets game_state to the state
+		 * parameter.
+		 */
+		Game(void* state);
 		
 		~Game();
 		
@@ -62,6 +68,10 @@ class Game
 		 */
 		bool is_max_node();
 		
+		/**
+		 * Returns a vector of the int representations of all possible
+		 * moves from the current state.
+		 */
 		std::vector<int> calc_moves();
 		
 		/**

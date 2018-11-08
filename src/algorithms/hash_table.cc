@@ -28,8 +28,7 @@ static Game* game_clone(Game* game, void* ctx)
 
 static void game_free(void* game)
 {
-	printf("game_free unimplemented\n");
-	//TODO
+	delete (Game*)game;
 }
 
 static datatype_t dtypes = (datatype_t)
@@ -52,6 +51,12 @@ Hashtable::Hashtable(Statistics* statistics)
 	alpha_map = ht_alloc(&dtypes, 10);
 	beta_map = ht_alloc(&dtypes, 10);
 	stats = statistics;
+}
+
+Hashtable::~Hashtable()
+{
+	ht_free(alpha_map);
+	ht_free(beta_map);
 }
 
 int Hashtable::get_alpha(Game* key)

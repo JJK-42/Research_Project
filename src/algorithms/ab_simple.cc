@@ -22,7 +22,8 @@ int max(int x, int y)
 
 Alphabeta::Alphabeta()
 {
-	stats = new Statistics();
+	//stats = new Statistics();
+	//hash_table = new 
 }
 
 int Alphabeta::expand(Game* game, int a, int b, int player, int depth, int& best)
@@ -105,8 +106,6 @@ int Alphabeta::run_algorithm(int argc, char** argv, Game* game)
 	int best_move = -1;
 	int winning_val;
 	
-	clear_bounds();
-	
 	bool print = true;
 	if(argc > 1 && argv[1][0] == 'f')
 		print = false;
@@ -144,5 +143,6 @@ int Alphabeta::run_algorithm(int argc, char** argv, Game* game)
 	}
 	
 	vector<int> moves = game->calc_moves();
+	delete g;
 	return moves[best_move];
 }

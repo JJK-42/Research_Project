@@ -20,6 +20,8 @@ class Hashtable
 		Hashtable();
 		Hashtable(Statistics* statistics);
 		
+		~Hashtable();
+		
 		int get_alpha(Game* key);
 		int get_beta(Game* key);
 		bool swap_alpha(Game* key, int val);

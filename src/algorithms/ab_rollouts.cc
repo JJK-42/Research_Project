@@ -32,6 +32,11 @@ Rollouts::Rollouts()
 	stats = new Statistics();
 }
 
+Rollouts::~Rollouts()
+{
+	
+}
+
 /**
  * Evaluates the current game state and sets that state's alpha and beta
  * to this value. Also returns the value.
@@ -231,12 +236,12 @@ int Rollouts::run_algorithm(int argc, char** argv, Game* game)
 	if(argc > 4 && argv[4][0] == 'M')
 	{
 		printf("Running MT_SSS* on rollouts alpha beta.\n");
-		winning_val = mt_sss(g, MT_RANGE, 1, -1, best_move);
+		winning_val = mt_sss(g, MT_RANGE, 1, max_depth, best_move);
 	}
 	else
 	{
 		printf("Running rollouts alpha beta.\n");
-		winning_val = alphabeta(g, ALPHA, BETA, 1, -1, best_move);
+		winning_val = alphabeta(g, ALPHA, BETA, 1, max_depth, best_move);
 	}
 	stats->record_time();
 	

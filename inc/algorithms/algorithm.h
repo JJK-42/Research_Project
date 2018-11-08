@@ -8,7 +8,11 @@
 class Algorithm
 {
 	public:
+		virtual ~Algorithm() = 0;
+	
 		virtual int run_algorithm(int argc, char** argv, Game* game) = 0;
+		
+		void clear_bounds();
 		
 	protected:
 		Statistics* stats;
@@ -21,9 +25,7 @@ class Algorithm
 		//void store_alpha(int state, float val);
 		//void store_beta(int state, float val);
 		
-		void clear_bounds();
-		
-		Hashtable* hash_table;//might need to be a pointer
+		Hashtable* hash_table;
 };
 
 #endif

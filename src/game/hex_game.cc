@@ -33,6 +33,11 @@ Game::Game()
 	game_state = hex_state;
 }
 
+Game::Game(void* state)
+{
+	game_state = (HexGameState*)state;
+}
+
 Game::~Game()
 {
 	delete (HexGameState*)game_state;
@@ -50,9 +55,8 @@ bool Game::game_over()
 
 Game* Game::clone() const
 {
-	Game* other = new Game();
 	HexGameState* other_state = new HexGameState(*(HexGameState*)game_state);
-	other->game_state = other_state;
+	Game* other = new Game(other_state);
 	return other;
 }
 
