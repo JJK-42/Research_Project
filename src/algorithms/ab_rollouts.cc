@@ -29,7 +29,7 @@ int minmax(int x, int y, bool is_max)
 
 Rollouts::Rollouts()
 {
-	stats = new Statistics();
+	//stats = new Statistics();
 }
 
 Rollouts::~Rollouts()
@@ -47,6 +47,7 @@ int Rollouts::evaluate(Game* game)
 	hash_table->swap_alpha(game, val);
 	hash_table->swap_beta(game, val);
 	stats->record_leaf(game->get_hash());
+	//printf("Eval: %i\n", val);
 	return val;
 }
 
@@ -93,7 +94,7 @@ vector<Game*> Rollouts::expand(Game* game, int a, int b)
 		}
 		
 		int bchild = hash_table->get_beta(child);
-		if(b > bchild)
+		if(b < bchild)
 		{
 			bchild = b;
 			hash_table->swap_beta(child, b);
@@ -115,7 +116,6 @@ vector<Game*> Rollouts::expand(Game* game, int a, int b)
 int Rollouts::backpropagate(Game* game, int player)
 {
 	int best_move = -1;
-	//size_t state = game.get_state();
 	bool is_max = player > 0;
 	
 	int a_s;
@@ -160,7 +160,7 @@ int Rollouts::backpropagate(Game* game, int player)
  */
 int Rollouts::rollout(Game* game, int a, int b, int player, int depth)
 {
-	//printf("%i\n", depth);
+	//printf("%i ", depth);
 	int nmoves = game->get_nmoves();
 	if(nmoves > 0 && depth != 0)
 	{
@@ -168,6 +168,7 @@ int Rollouts::rollout(Game* game, int a, int b, int player, int depth)
 		if(candidates.size() > 0)
 		{
 			Game* next = select(candidates);
+			//printf("hash: %zu\n", next->get_hash());
 			rollout(next, hash_table->get_alpha(next), hash_table->get_beta(next), -player, depth - 1);
 			for(Game* g : candidates)
 				delete g;
@@ -191,6 +192,7 @@ int Rollouts::alphabeta(Game* game, int a, int b, int startp, int maxdepth, int&
 	
 	while(a < b)
 	{
+		//printf("Rolling out with a %i, b %i\n", a, b);
 		best = rollout(game, a, b, startp, maxdepth);
 		a = hash_table->get_alpha(game);
 		b = hash_table->get_beta(game);
@@ -217,8 +219,6 @@ int Rollouts::run_algorithm(int argc, char** argv, Game* game)
 	
 	int best_move = -1;
 	int winning_val;
-	
-	clear_bounds();
 	
 	bool print = true;
 	if(argc > 1 && argv[1][0] == 'f')
@@ -257,5 +257,6 @@ int Rollouts::run_algorithm(int argc, char** argv, Game* game)
 	}
 	
 	vector<int> moves = game->calc_moves();
+	delete g;
 	return moves[best_move];
 }
