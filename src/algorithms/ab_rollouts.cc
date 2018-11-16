@@ -27,15 +27,9 @@ int minmax(int x, int y, bool is_max)
 		return x < y ? x : y;
 }
 
-Rollouts::Rollouts()
-{
-	//stats = new Statistics();
-}
+Rollouts::Rollouts(){}
 
-Rollouts::~Rollouts()
-{
-	
-}
+Rollouts::~Rollouts(){}
 
 /**
  * Evaluates the current game state and sets that state's alpha and beta

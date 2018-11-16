@@ -1,24 +1,25 @@
 #ifndef AB_ROL_PAR_H
 #define AB_ROL_PAR_H
 
-#include "algorithms/hash_table.h"
-#include "algorithms/algorithm.h"
+//#include "algorithms/hash_table.h"
+#include "algorithms/ab_rollouts.h"
 
-class RolPar : public Algorithm
+class RolPar : public Rollouts
 {
 	public:
 		RolPar();
+		~RolPar();
 		
-		int run_algorithm(int argc, char** argv, Game game);
+		int run_algorithm(int argc, char** argv, Game* game);
 		
 	protected:
-		//float maxnode(Game game, float a, float b, int depth, int& best);
-		//float minnode(Game game, float a, float b, int depth, int& best);
+		Game* select(std::vector<Game*> candidates);
+		std::vector<Game*> expand(Game* game, int a, int b);
 		
-		float expand(Game game, float a, float b, int player, int depth, int& best);
+		static void* new_thread(void* args);
 		
-		float alphabeta(Game game, float a, float b, int player, int depth, int& best);
-		float mt_sss(Game game, float range, int player, int depth, int& best_move);
+		//int alphabeta(Game* game, float a, float b, int player, int depth, int& best);
+		//int mt_sss(Game* game, float range, int player, int depth, int& best_move);
 };
 
 #endif

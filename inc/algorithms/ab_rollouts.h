@@ -13,7 +13,7 @@ class Rollouts : public Algorithm
 		
 		int run_algorithm(int argc, char** argv, Game* game);
 		
-	private:
+	protected:
 		int evaluate(Game* game);
 		Game* select(std::vector<Game*> candidates);
 		std::vector<Game*> expand(Game* game, int a, int b);

@@ -1,6 +1,5 @@
 CC=g++
 CFLAGS=-c -Wall -Iinc -std=c++0x -O0 -g
-CPAR=-fcilkplus -lcilkrts
 
 HEADERS=inc/algorithms/hash_table.h\
 				inc/algorithms/algorithm.h\
@@ -15,10 +14,14 @@ SPARSEHASHLIBS=-Ilib/sparsehash
 HASHTABLELIB=-Llib/ -Ilib/hashtable -lcht -lutil -ldl
 HASHTABLEHEADERS=lib/hashtable/util/hashtable.h
 
+CILK=-fcilkplus -lcilkrts
+PTHREAD=-lpthread
+
 HASHHS=$(HASHTABLEHEADERS)
 HASHLIBS=$(HASHTABLELIB)
+CPAR=$(PTHREAD)
 
-all: ab_rol_hex play_hex_game clean
+all: ab_rol_par play_hex_game clean
 
 clean:
 	rm *.o
@@ -38,14 +41,17 @@ ab_hex: run_ab_hex.o ab_simple.o algorithm.o hash_table.o hex_game.o stats.o Hex
 ab_rol_hex: run_rol_hex.o ab_rollouts.o algorithm.o hash_table.o hex_game.o stats.o HexState.o
 	$(CC) run_rol_hex.o ab_rollouts.o algorithm.o hash_table.o hex_game.o stats.o HexState.o -o ab_rol_hex $(HASHLIBS)
 
+ab_rol_par: run_rol_par.o ab_rol_par.o ab_rollouts.o algorithm.o hash_table.o hex_game.o stats.o HexState.o
+	$(CC) run_rol_par.o ab_rol_par.o ab_rollouts.o algorithm.o hash_table.o hex_game.o stats.o HexState.o -o ab_rol_par $(HASHLIBS) $(CPAR)
+
 ab_par_hex: run_ab_par.o ab_par.o algorithm.o hash_table.o hex_game.o stats.o
 	$(CC) $(CFLAGS) run_ab_par.o ab_par.o algorithm.o hash_table.o hex_game.o stats.o -o ab_par_hex $(HASHLIBS)
 
 #ab_rol_par_simple: ab_rollouts_parallel.o algorithm.o simple_game.o stats.o
 #	$(CC) ab_rollouts_parallel.o algorithm.o simple_game.o stats.o -o ab_rol_par_simple $(CFLAGS)
 
-play_hex_game: play_game.o ab_simple.o algorithm.o hex_game.o HexState.o hash_table.o stats.o
-	$(CC) play_game.o ab_simple.o algorithm.o hex_game.o HexState.o hash_table.o stats.o -o play_hex_game $(HASHLIBS)
+play_hex_game: play_game.o ab_simple.o ab_rollouts.o algorithm.o hex_game.o HexState.o hash_table.o stats.o
+	$(CC) play_game.o ab_simple.o ab_rollouts.o algorithm.o hex_game.o HexState.o hash_table.o stats.o -o play_hex_game $(HASHLIBS)
 
 play_simple_game: play_game.o ab_simple.o ab_rollouts.o algorithm.o simple_game.o stats.o
 	$(CC) $(CFLAGS) play_game.o ab_simple.o ab_rollouts.o algorithm.o simple_game.o stats.o -o play_simple_game $(HASHLIBS)
@@ -56,8 +62,8 @@ algorithm.o: src/algorithms/algorithm.cc $(HEADERS)
 ab_simple.o: src/algorithms/ab_simple.cc $(HEADERS) 
 	$(CC) $(CFLAGS) src/algorithms/ab_simple.cc $(HASHLIBS)
 
-ab_par.o: src/algorithms/ab_rollouts_parallel.cc $(HEADERS) 
-	$(CC) $(CFLAGS) src/algorithms/ab_rollouts_parallel.cc $(HASHLIBS)
+ab_rol_par.o: src/algorithms/ab_rol_par.cc $(HEADERS) 
+	$(CC) $(CFLAGS) src/algorithms/ab_rol_par.cc $(HASHLIBS)
 
 ab_rollouts.o: src/algorithms/ab_rollouts.cc $(HEADERS)
 	$(CC) $(CFLAGS) src/algorithms/ab_rollouts.cc $(HASHLIBS)
@@ -89,5 +95,5 @@ run_ab_hex.o: src/main/run_ab_hex.cc inc/game/game.h inc/algorithms/ab_simple.h
 run_rol_hex.o: src/main/run_rol_hex.cc inc/game/game.h inc/algorithms/ab_rollouts.h
 	$(CC) $(CFLAGS) src/main/run_rol_hex.cc $(HASHLIBS)
 	
-run_ab_par.o: src/main/run_ab_par.cc inc/game/game.h inc/algorithms/ab_rol_par.h
-	$(CC) $(CFLAGS) src/main/run_ab_par.cc $(HASHLIBS)
+run_rol_par.o: src/main/run_rol_par.cc inc/game/game.h inc/algorithms/ab_rol_par.h
+	$(CC) $(CFLAGS) src/main/run_rol_par.cc $(HASHLIBS)

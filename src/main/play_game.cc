@@ -6,7 +6,7 @@
 
 #include "play_game.h"
 #include "algorithms/algorithm.h"
-//#include "algorithms/ab_rollouts.h"
+#include "algorithms/ab_rollouts.h"
 #include "algorithms/ab_simple.h"
 #include "game/game.h"
 
@@ -73,9 +73,8 @@ int main(int argc, char** argv)
 		printf("Adding player: %s\n", argv[i]);
 		if(argv[i][0] == 'r')
 		{
-			printf("Rollouts currently unavailable!\n");
-			//Rollouts* r = new Rollouts();
-			//players.push_back(r);
+			Rollouts* r = new Rollouts();
+			players.push_back(r);
 		}
 		else if(argv[i][0] == 's' || argv[i][0] == 'a')
 		{
@@ -97,6 +96,8 @@ int main(int argc, char** argv)
 	play_game(argc, argv);
 	print_win_message(game->get_winner());
 	
+	//This removed a memory leak for some reason. Weird.
+	//The actual problem might lie elsewhere...
 	for(Algorithm* player : players)
 		if(player != NULL)
 			delete player;

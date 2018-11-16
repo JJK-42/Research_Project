@@ -5,32 +5,36 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
 #include <utility>
 
-#include "algorithms/ab_rollouts_parallel.h"
+#include "algorithms/ab_rol_par.h"
 #include "algorithms/hash_table.h"
 #include "game/game.h"
 #include "statistics/stats.h"
 
 using namespace std;
 
-const float MT_RANGE = 1.0;
+const int MT_RANGE = 10;
 const int N_THREADS = 2;
 
 /**
  * If is_max, return whichever is greater of x and y
  * If not is_max, return whichever is smaller
- */
-float minmax(float x, float y, bool is_max)
+ *//*
+int minmax(int x, int y, bool is_max)
 {
 	if(is_max)
 		return x > y ? x : y;
 	else
 		return x < y ? x : y;
-}
+}*/
 
 RolPar::RolPar(){}
 
+RolPar::~RolPar(){}
+
+/*
 float RolPar::get_alpha(int state)
 {
 	float res = Algorithm::get_alpha(state);
@@ -51,12 +55,12 @@ void RolPar::store_alpha(int state, float val)
 void RolPar::store_beta(int state, float val)
 {
 	Algorithm::store_beta(state, val);
-}
+}*/
 
 /**
  * Evaluates the current game state and sets that state's alpha and beta
  * to this value. Also returns the value.
- */
+ *//*
 float RolPar::evaluate(Game game)
 {
 	int node = game.get_state();
@@ -65,13 +69,13 @@ float RolPar::evaluate(Game game)
 	store_beta(node, val);
 	stats.record_leaf(node);
 	return val;
-}
+}*/
 
 /**
  * Selects a state to be expanded next.
  * (Currently a random state in the vector.)
  */
-int RolPar::select(vector<int> candidates)
+Game* RolPar::select(vector<Game*> candidates)
 {
 	//For parallel AB, this could check whether the candidate is currently
 	//being worked on. Pick the first available candidate that is not 
@@ -93,7 +97,7 @@ int RolPar::select(vector<int> candidates)
  * Propagates alpha and beta forward to all children.
  * Then returns a vector of all children that are within the alpha-beta
  * window.
- */
+ *//*
 vector<int> RolPar::expand(Game game, float a, float b)
 {
 	stats.record_expand(game.get_state());
@@ -122,12 +126,12 @@ vector<int> RolPar::expand(Game game, float a, float b)
 			child_states.push_back(child);
 	}
 	return child_states;
-}
+}*/
 
 /**
  * Calculates a state's alpha and beta. Executed before returning one
  * recursive iteration of the rollout algorithm.
- */
+ *//*
 int RolPar::backpropagate(Game game, int player)
 {
 	int best_move = -1;
@@ -162,13 +166,13 @@ int RolPar::backpropagate(Game game, int player)
 	store_alpha(state, a_s);
 	store_beta(state, b_s);
 	return best_move;
-}
+}*/
 
 /**
  * Rolls out a single path through the game tree.
  * Will never revisit a previous path due to its alpha-beta pruning
  * window.
- */
+ *//*
 int RolPar::rollout(Game game, float a, float b, int player)
 {
 	int nmoves = game.get_nmoves();
@@ -187,12 +191,12 @@ int RolPar::rollout(Game game, float a, float b, int player)
 	else
 		evaluate(game);
 	return -1;
-}
+}*/
 
 /**
  * Alpha beta with rollouts.
  * Calls rollouts until a solution has been found.
- */
+ *//*
 float RolPar::alphabeta(Game game, float a, float b, int startp, int maxdepth, int& best)
 {
 	int root = game.get_state();
@@ -211,16 +215,25 @@ float RolPar::alphabeta(Game game, float a, float b, int startp, int maxdepth, i
 	}
 	
 	return b_r;
-}
+}*/
 
-void* RolPar::run_thread(void* ptr)
+void* RolPar::new_thread(void* args)
 {
-	Game game = *(Game*)ptr;
-	int best_move;
-	float best_val = alphabeta(game, ALPHA, BETA, 1, -1, best_move);
-	pthread_exit(&make_pair(best_val, best_move));
+	pair<RolPar*, Game*>* arguments = (pair<RolPar*, Game*>*)args;
+	RolPar* alg = arguments->first;
+	Game* game = arguments->second->clone();
+	
+	int best_move = -1;
+	int best_val = alg->alphabeta(game, ALPHA, BETA, 1, -1, best_move);
+	
+	printf("Best: move %i, val %i\n", best_move, best_val);
+	
+	pair<int, int> ret = make_pair(best_move, best_val);
+	delete game;
+	pthread_exit(&ret);
 }
 
+/*
 float RolPar::mt_sss(Game game, float range, int player, int depth, int& best_move)
 {
 	//TODO: adapt for parallelism
@@ -228,16 +241,16 @@ float RolPar::mt_sss(Game game, float range, int player, int depth, int& best_mo
 	while(get_alpha(root) < get_beta(root))
 		alphabeta(game, get_beta(root) - range, get_beta(root), player, depth, best_move);
 	return get_alpha(root);
-}
+}*/
 
 /**
  * Runs the alpha beta by rollouts algorithm on whatever game is linked
  * to the game_interface.h header. Prints game seed, outcome and best
  * move for player 1 (max player).
  */
-int RolPar::run_algorithm(int argc, char** argv, Game game)
+int RolPar::run_algorithm(int argc, char** argv, Game* game)
 {
-	stats.reset();
+	stats->reset();
 	
 	bool print = true;
 	if(argc > 1 && argv[1][0] == 'f')
@@ -248,11 +261,13 @@ int RolPar::run_algorithm(int argc, char** argv, Game game)
 		seed = atoi(argv[2]);
 	
 	int best_move;
-	float winning_val = ALPHA;
+	int winning_val = ALPHA;
 	
+	if(seed == -1)
+		seed = time(NULL);
 	srand(seed);
 	
-	stats.start_timer();
+	stats->start_timer();
 	if(argc > 3)
 	{
 		printf("Running MT_SSS on rollouts alpha beta* with seed %i.\n", seed);
@@ -262,50 +277,38 @@ int RolPar::run_algorithm(int argc, char** argv, Game game)
 	{
 		printf("Running rollouts alpha beta with seed %i.\n", seed);
 		
-		pthread_t thread[N_THREADS];
+		pthread_t thread[N_THREADS];//TODO: replace n threads with cmd line arg
 		for(int i = 0; i < N_THREADS; i++)
 		{
-			int ret = pthread_create(&(thread[i]), NULL, run_thread, NULL);
+			//Game* g = game->clone();
+			pair<RolPar*, Game*> args = make_pair(this, game);
+			int ret = pthread_create(&(thread[i]), NULL, new_thread, &args);
 			printf("pthread_create returned %i for thread %i.\n", ret, i);
 		}
 		
-		winning_val = get_alpha(game);
-		pair<float, int> result[N_THREADS];
+		winning_val = hash_table->get_alpha(game);
+		pair<int, int>* result[N_THREADS];
 		
 		for(int i = 0; i < N_THREADS; i++)
-			pthread_join(thread[i], &(result[i]));
+			pthread_join(thread[i], (void**)result[i]);
 		
 		for(int i = 0; i < N_THREADS; i++)
+		{
+			printf("Thread %i returned: move %i, val %i\n", i, result[i]->first, result[i]->second);
 			if(result[i]->first == winning_val)
 				best_move = result[i]->second;
+		}
 	}
-	stats.record_time();
+	stats->record_time();
 
 	if(print)
 	{
-		printf("Outcome for player 1: %f\n", winning_val);
+		printf("Outcome for player 1: %i\n", winning_val);
 		printf("Best move: %i\n", best_move);
-		if(game.get_nstate_estimate() < 128)
-			stats.print_traversal();
-		stats.print_stats();
+		if(game->get_nstate_estimate() < 128)
+			stats->print_traversal();
+		stats->print_stats();
 	}
 	
 	return 0;
 }
-
-#ifndef __MAIN__
-#define __MAIN__
-
-int main(int argc, char** argv)
-{
-	Rollouts algorithm;
-	
-	int seed = 0;
-	if(argc > 2)
-		seed = atoi(argv[2]);
-	
-	Game game(seed);
-	return algorithm.run_algorithm(argc, argv, game);
-}
-
-#endif
