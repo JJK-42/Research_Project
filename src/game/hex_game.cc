@@ -22,14 +22,16 @@ const int VER = DIM;
 Game::Game(int seed)
 {
 	HexGameState* hex_state = new HexGameState(DIM);
-	hex_state->init_zobrist(seed);
+	if(!HexGameState::hash_is_initialised())
+		HexGameState::init_zobrist(seed);
 	game_state = hex_state;
 }
 
 Game::Game()
 {
 	HexGameState* hex_state = new HexGameState(DIM);
-	hex_state->init_zobrist(0);
+	if(!HexGameState::hash_is_initialised())
+		HexGameState::init_zobrist(0);
 	game_state = hex_state;
 }
 
@@ -141,14 +143,13 @@ int evaluate_internal(HexGameState* state, int max_a, int max_b)
 	int game_val = (float)max_b / 2.0 + (float)max_a / 2.0;
 	int bscore = 0;
 	int wscore = 0;
+	
 	for(int i = 0; i < DIM * DIM; i++)
 	{
 		bscore += evaluate_position(state, i, BLACK, HOR, max_a, max_b);
 		wscore += evaluate_position(state, i, WHITE, VER, max_a, max_b);
 	}
 	
-	//state->Print();
-	//printf("game_val: %i, bscore: %i, wscore: %i\n", game_val, bscore, wscore);
 	return game_val - bscore + wscore;
 }
 
@@ -159,15 +160,9 @@ int Game::evaluate(int max_a, int max_b)
 	if(!state->IsTerminal())
 		return evaluate_internal(state, max_a, max_b);
 	if(state->GetResult(BLACK) > 0)
-	{
-		//state->Print();
 		return max_b;
-	}
 	else if(state->GetResult(WHITE) > 0)
-	{
-		//state->Print();
 		return max_a;
-	}
 	else
 		return (float)max_b / 2.0 + (float)max_a / 2.0;
 }

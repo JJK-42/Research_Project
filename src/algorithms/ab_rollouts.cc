@@ -29,6 +29,8 @@ int minmax(int x, int y, bool is_max)
 
 Rollouts::Rollouts(){}
 
+Rollouts::Rollouts(Hashtable* htable) : Algorithm(htable){}
+
 Rollouts::~Rollouts(){}
 
 /**

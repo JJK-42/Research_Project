@@ -7,6 +7,8 @@
  * Modified by J Koschny
  * Added operator==
  * Added hash function
+ * 
+ * Made several things static for increased efficiency.
  */
 #include "game/hex/Utilities.h"
 
@@ -80,17 +82,24 @@ public:
     bool operator==(const HexGameState& other) const;
     size_t get_hash() const;
     int get_val(int pos) const;
-		void init_zobrist(int seed);
+    
+		static void init_zobrist(int seed);
+		static bool hash_is_initialised();
     
 private:
 		/** Array containing the bit strings for zobrist */
-		uint64_t hash_strings[N_PIECES][MAX_SIZE];
+		static uint64_t hash_strings[N_PIECES][MAX_SIZE];
+		static bool hash_initialised;
+		static bool edges_initialised;
+		
+    static int dim;
+    static int size;
     
-    vector< vector<int> > edges;
+    static vector< vector<int> > edges;
+		
+		uint64_t hash;
     vector<BItem> dsboard;      //the board for using disjoint set data structure
     vector<int> lefPos;
-    int dim;
-    int size;
     int pjm;
     int moveCounter;
     float _bReward;

@@ -18,6 +18,7 @@ class Algorithm
 		Statistics* stats;
 		
 		Algorithm();
+		Algorithm(Hashtable* ht);
 		
 		//float get_alpha(int state);
 		//float get_beta(int state);

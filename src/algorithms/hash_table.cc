@@ -10,7 +10,7 @@ using namespace std;
 
 static int game_comp(const Game* g1, const Game* g2, void* ctx)
 {
-	return g1 == g2;//verify
+	return g1 == g2;
 	(void) ctx;
 }
 
@@ -100,8 +100,6 @@ bool Hashtable::increase_alpha(Game* key, int val, int comp_val)
 	map_key_t out;
 	map_val_t old = ht_get(alpha_map, (map_key_t)key, NULL);
 	
-	//printf("Putting a %i at %i\n", val, key->get_hash());
-	
 	if(val >= comp_val && val > (int)old)
 		ht_cas(alpha_map, (map_key_t)key, old,
 	       (map_val_t)val, &out, NULL);
@@ -115,8 +113,6 @@ bool Hashtable::increase_beta(Game* key, int val, int comp_val)
 {
 	map_key_t out;
 	map_val_t old = ht_get(beta_map, (map_key_t)key, NULL);
-	
-	//printf("Putting b %i at %i\n", val, key->get_hash());
 	
 	if(val <= comp_val && val < (int)old)
 		ht_cas(beta_map, (map_key_t)key, old,
@@ -132,8 +128,6 @@ bool Hashtable::swap_alpha(Game* key, int val)
 	map_key_t out;
 	map_val_t old = ht_get(alpha_map, (map_key_t)key, NULL);
 	
-	//printf("Putting a %i at %i\n", val, key->get_hash());
-	
 	if((int)old < val)
 		ht_cas(alpha_map, (map_key_t)key, old,
 		       (map_val_t)val, &out, NULL);
@@ -147,8 +141,6 @@ bool Hashtable::swap_beta(Game* key, int val)
 {
 	map_key_t out;
 	map_val_t old = ht_get(beta_map, (map_key_t)key, NULL);
-	
-	//printf("Putting b %i at %i\n", val, key->get_hash());
 	
 	if((int)old > val)
 		ht_cas(beta_map, (map_key_t)key, old,

@@ -9,9 +9,20 @@
  * Added get_val
  * Added get_hash
  * Added init_zobrist
+ * 
+ * Modified put_stone to update hash
  */
 
 #include "game/hex/HexState.h"
+
+bool HexGameState::hash_initialised = false;
+bool HexGameState::edges_initialised = false;
+
+uint64_t HexGameState::hash_strings[N_PIECES][MAX_SIZE];
+vector< vector<int> > HexGameState::edges;
+
+int HexGameState::dim = 0;
+int HexGameState::size = 0;
 
 void HexGameState::init_zobrist(int seed)
 {
@@ -32,29 +43,31 @@ void HexGameState::init_zobrist(int seed)
 					}
 			}
 			while(generate);
-			//printf("[%i][%i]:%zx\n", i, j, hash_strings[i][j]);
 		}
+
+	hash_initialised = true;
+}
+
+bool HexGameState::hash_is_initialised()
+{
+	return hash_initialised;
 }
 
 bool HexGameState::operator==(const HexGameState& other) const
 {
-	//Print();
-	//other.Print();
-	//printf("%zx =? %zx\n", get_hash(), other.get_hash());
+	if(get_hash() != other.get_hash())
+		return false;
+	
 	for(int i = 0; i < size; i++)
 		if(dsboard[i].val != other.get_val(i))
 			return false;
-	//printf("true\n");
+	
 	return true;
 }
 
 size_t HexGameState::get_hash() const
 {
-	size_t h_val = 0;
-	for(size_t i = 0; i < dsboard.size(); i++)
-		if(dsboard[i].val != CLEAR)
-			h_val = h_val ^ hash_strings[dsboard[i].val - 1][i];
-	return h_val;
+	return hash;
 }
 
 int HexGameState::get_val(int pos) const
@@ -67,6 +80,7 @@ HexGameState::HexGameState(){
 }
 
 HexGameState::HexGameState(int d) {
+		hash = 0;
     dim = d;
     size = d*d;
     pjm = 2;
@@ -76,26 +90,15 @@ HexGameState::HexGameState(int d) {
 }
 
 HexGameState::HexGameState(const HexGameState& orig) {
-    dim = orig.dim;
-    size = orig.size;
+		hash = orig.get_hash();
+    //dim = orig.dim;
+    //size = orig.size;
     pjm = orig.pjm;
     moveCounter = orig.moveCounter;
-    edges = orig.edges;
-    
-    /*
-    edges.resize(orig.edges.size());
-    for(size_t i = 0; i < orig.edges.size(); i++)
-    {
-			edges[i].resize(orig.edges[i].size());
-			for(size_t j = 0; j < orig.edges[i].size(); j++)
-				edges[i][j] = orig.edges[i][j];
-		}*/
+    //edges = orig.edges;
 		
     dsboard = orig.dsboard;
     lefPos = orig.lefPos;
-    for(int i = 0; i < N_PIECES; i++)
-			for(size_t j = 0; j < dsboard.size(); j++)
-				hash_strings[i][j] = orig.hash_strings[i][j];
 
 }
 
@@ -103,26 +106,15 @@ HexGameState& HexGameState::operator=(const HexGameState& orig) {
     if (this == &orig) {
         return *this;
     }
-    dim = orig.dim;
-    size = orig.size;
+		hash = orig.get_hash();
+    //dim = orig.dim;
+    //size = orig.size;
     pjm = orig.pjm;
     moveCounter = orig.moveCounter;
-    edges = orig.edges;
-    
-    /*
-    edges.resize(orig.edges.size());
-    for(size_t i = 0; i < orig.edges.size(); i++)
-    {
-			edges[i].resize(orig.edges[i].size());
-			for(size_t j = 0; j < orig.edges[i].size(); j++)
-				edges[i][j] = orig.edges[i][j];
-		}*/
+    //edges = orig.edges;
 		
     dsboard = orig.dsboard;
     lefPos = orig.lefPos;
-    for(int i = 0; i < N_PIECES; i++)
-			for(size_t j = 0; j < dsboard.size(); j++)
-				hash_strings[i][j] = orig.hash_strings[i][j];
 
     return *this;
 }
@@ -131,26 +123,24 @@ HexGameState& HexGameState::operator =(HexGameState&& orig){
         if (this == &orig) {
         return *this;
     }
-    dim = orig.dim;
-    size = orig.size;
+		hash = orig.get_hash();
+    //dim = orig.dim;
+    //size = orig.size;
     pjm = orig.pjm;
     moveCounter = orig.moveCounter;
     //edges = std::move(orig.edges);
     //dsboard = std::move(orig.dsboard);
     //lefPos = std::move(orig.lefPos);
-    edges = orig.edges;
-    dsboard = orig.dsboard;
-    lefPos = orig.lefPos;
-    for(int i = 0; i < N_PIECES; i++)
-			for(size_t j = 0; j < dsboard.size(); j++)
-				hash_strings[i][j] = orig.hash_strings[i][j];
+    //edges = orig.edges;
+    //dsboard = orig.dsboard;
+    //lefPos = orig.lefPos;
 
     return *this;
 }
 
 HexGameState::~HexGameState() {
     dsboard.clear();
-    edges.clear();
+    //edges.clear();
     lefPos.clear();
 }
 
@@ -158,6 +148,7 @@ void HexGameState::Reset() {
     pjm = WHITE; //In Hex, black plays first.
     moveCounter = 0;
     ClearBoard();
+    hash = 0;
 }
 
 bool HexGameState::IsTerminal() {
@@ -177,18 +168,22 @@ bool HexGameState::IsTerminal() {
  */
 void HexGameState::MakeBoard() {
     dsboard.resize(dim * dim);
-    edges.resize(dim * dim);
-    //lefPos.resize(dim);
 
-    int count = 0;
-    for (int i = 0; i < dim; i++) {
-        for (int j = 0; j < dim; j++) {
-            MakeEdges(i, j, edges[count++]);
-            //            if (POS(i,j,dim) % dim == 0)
-            //                lefPos.push_back(POS(i,j,dim));
-        }
-    }
+		if(!edges_initialised)
+		{
+			edges.resize(dim * dim);
+			//lefPos.resize(dim);
 
+			int count = 0;
+			for (int i = 0; i < dim; i++) {
+					for (int j = 0; j < dim; j++) {
+							MakeEdges(i, j, edges[count++]);
+							//            if (POS(i,j,dim) % dim == 0)
+							//                lefPos.push_back(POS(i,j,dim));
+					}
+			}
+			edges_initialised = true;
+		}
     for (int i = 0; i < size; i++)
         if (i % dim == 0)
             lefPos.push_back(i);
@@ -293,6 +288,10 @@ int HexGameState::GetPlayoutMoves(vector<int>& moves) {
 
 int HexGameState::PutStone(int pos) {
     dsboard[pos].val = pjm;
+    
+    hash ^= hash_strings[pjm][pos];
+    //hash ^= ~hash_strings[CLEAR][pos];
+    
     MakeSet(pos);
     for (unsigned int j = 0; j < edges[pos].size(); j++) {
         Union(pos, edges[pos].at(j));

@@ -30,9 +30,47 @@ int minmax(int x, int y, bool is_max)
 		return x < y ? x : y;
 }*/
 
+/**
+ * Wrapper for thread return data.
+ * @id id of the move
+ * @val resulting value if the game is played out with this move
+ */
+struct Move_data
+{
+	int id;
+	int val;
+	
+	Move_data(int move_id, int move_val)
+	{
+		id = move_id;
+		val = move_val;
+	}
+};
+
+struct Thread_args
+{
+	RolPar* algorithm;
+	Game* game;
+	unsigned int* seedp;
+	
+	Thread_args(RolPar* alg, Game* g, unsigned int* seedpointer)
+	{
+		algorithm = alg;
+		game = g;
+		seedp = seedpointer;
+	}
+};
+
 RolPar::RolPar(){}
 
+RolPar::RolPar(Hashtable* htable) : Rollouts(htable){}
+
 RolPar::~RolPar(){}
+
+void RolPar::set_seed(unsigned int* seedpointer)
+{
+	seedp = seedpointer;
+}
 
 /*
 float RolPar::get_alpha(int state)
@@ -87,7 +125,7 @@ Game* RolPar::select(vector<Game*> candidates)
 	//it is at the top of another process' rollout stack.
 	
 	//Currently selects a random candidate.
-	int idx = rand() % candidates.size();
+	int idx = rand_r(seedp) % candidates.size();
 	return candidates[idx];
 	
 	//return candidates.front();
@@ -219,16 +257,17 @@ float RolPar::alphabeta(Game game, float a, float b, int startp, int maxdepth, i
 
 void* RolPar::new_thread(void* args)
 {
-	pair<RolPar*, Game*>* arguments = (pair<RolPar*, Game*>*)args;
-	RolPar* alg = arguments->first;
-	Game* game = arguments->second->clone();
+	Thread_args* arguments = (Thread_args*)args;
+	RolPar* alg = arguments->algorithm;
+	Game* game = arguments->game;
+	alg->set_seed(arguments->seedp);
 	
 	int best_move = -1;
 	int best_val = alg->alphabeta(game, ALPHA, BETA, 1, -1, best_move);
 	
 	printf("Best: move %i, val %i\n", best_move, best_val);
 	
-	pair<int, int> ret = make_pair(best_move, best_val);
+	Move_data* ret = new Move_data(best_move, best_val);
 	delete game;
 	pthread_exit(&ret);
 }
@@ -280,23 +319,25 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 		pthread_t thread[N_THREADS];//TODO: replace n threads with cmd line arg
 		for(int i = 0; i < N_THREADS; i++)
 		{
-			//Game* g = game->clone();
-			pair<RolPar*, Game*> args = make_pair(this, game);
+			RolPar* algorithm = new RolPar(hash_table);
+			unsigned int* seedpointer = new unsigned int(seed + i);
+			Thread_args* args = new Thread_args(algorithm, game->clone(), seedpointer);
+			
 			int ret = pthread_create(&(thread[i]), NULL, new_thread, &args);
 			printf("pthread_create returned %i for thread %i.\n", ret, i);
 		}
 		
 		winning_val = hash_table->get_alpha(game);
-		pair<int, int>* result[N_THREADS];
+		Move_data* result[N_THREADS];
 		
 		for(int i = 0; i < N_THREADS; i++)
 			pthread_join(thread[i], (void**)result[i]);
 		
 		for(int i = 0; i < N_THREADS; i++)
 		{
-			printf("Thread %i returned: move %i, val %i\n", i, result[i]->first, result[i]->second);
-			if(result[i]->first == winning_val)
-				best_move = result[i]->second;
+			printf("Thread %i returned: move %i, val %i\n", i, result[i]->id, result[i]->val);
+			if(result[i]->val == winning_val)
+				best_move = result[i]->id;
 		}
 	}
 	stats->record_time();
