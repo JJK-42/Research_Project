@@ -21,7 +21,7 @@ HASHHS=$(HASHTABLEHEADERS)
 HASHLIBS=$(HASHTABLELIB)
 CPAR=$(PTHREAD)
 
-all: ab_rol_par play_hex_game clean
+all: ab_rol_par play_hex_game ab_rol_hex clean
 
 clean:
 	rm *.o

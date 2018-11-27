@@ -19,18 +19,6 @@ const int MT_RANGE = 10;
 const int N_THREADS = 2;
 
 /**
- * If is_max, return whichever is greater of x and y
- * If not is_max, return whichever is smaller
- *//*
-int minmax(int x, int y, bool is_max)
-{
-	if(is_max)
-		return x > y ? x : y;
-	else
-		return x < y ? x : y;
-}*/
-
-/**
  * Wrapper for thread return data.
  * @id id of the move
  * @val resulting value if the game is played out with this move
@@ -51,13 +39,15 @@ struct Thread_args
 {
 	RolPar* algorithm;
 	Game* game;
-	unsigned int* seedp;
+	unsigned int seedp;
+	int thread_id;
 	
-	Thread_args(RolPar* alg, Game* g, unsigned int* seedpointer)
+	Thread_args(RolPar* alg, Game* g, unsigned int seedpointer, int tid)
 	{
 		algorithm = alg;
 		game = g;
 		seedp = seedpointer;
+		thread_id = tid;
 	}
 };
 
@@ -67,47 +57,10 @@ RolPar::RolPar(Hashtable* htable) : Rollouts(htable){}
 
 RolPar::~RolPar(){}
 
-void RolPar::set_seed(unsigned int* seedpointer)
+void RolPar::set_seed(unsigned int seedpointer)
 {
 	seedp = seedpointer;
 }
-
-/*
-float RolPar::get_alpha(int state)
-{
-	float res = Algorithm::get_alpha(state);
-	return res;
-}
-
-float RolPar::get_beta(int state)
-{
-	float res = Algorithm::get_beta(state);
-	return res;
-}
-
-void RolPar::store_alpha(int state, float val)
-{
-	Algorithm::store_alpha(state, val);
-}
-
-void RolPar::store_beta(int state, float val)
-{
-	Algorithm::store_beta(state, val);
-}*/
-
-/**
- * Evaluates the current game state and sets that state's alpha and beta
- * to this value. Also returns the value.
- *//*
-float RolPar::evaluate(Game game)
-{
-	int node = game.get_state();
-	float val = game.evaluate();
-	store_alpha(node, val);
-	store_beta(node, val);
-	stats.record_leaf(node);
-	return val;
-}*/
 
 /**
  * Selects a state to be expanded next.
@@ -125,135 +78,11 @@ Game* RolPar::select(vector<Game*> candidates)
 	//it is at the top of another process' rollout stack.
 	
 	//Currently selects a random candidate.
-	int idx = rand_r(seedp) % candidates.size();
+	int idx = rand_r(&seedp) % candidates.size();
 	return candidates[idx];
 	
 	//return candidates.front();
 }
-
-/**
- * Propagates alpha and beta forward to all children.
- * Then returns a vector of all children that are within the alpha-beta
- * window.
- *//*
-vector<int> RolPar::expand(Game game, float a, float b)
-{
-	stats.record_expand(game.get_state());
-	
-	vector<int> child_states;
-	
-	for(int i = 0; i < game.get_nmoves(); i++)
-	{
-		int child = game.get_child_state(i);
-		
-		float a_c = get_alpha(child);
-		if(a > a_c)
-		{
-			store_alpha(child, a);
-			a_c = a;
-		}
-		
-		float b_c = get_beta(child);
-		if(b < b_c)
-		{
-			store_beta(child, b);
-			b_c = b;
-		}
-		
-		if(a_c < b_c)
-			child_states.push_back(child);
-	}
-	return child_states;
-}*/
-
-/**
- * Calculates a state's alpha and beta. Executed before returning one
- * recursive iteration of the rollout algorithm.
- *//*
-int RolPar::backpropagate(Game game, int player)
-{
-	int best_move = -1;
-	int state = game.get_state();
-	bool is_max = player > 0;
-	
-	float a_s;
-	float b_s;
-	if(is_max)
-		a_s = b_s = ALPHA;
-	else
-		a_s = b_s = BETA;
-	
-	for(int i = 0; i < game.get_nmoves(); i++)
-	{
-		int child = game.get_child_state(i);
-		
-		float a_c = get_alpha(child);
-		if((is_max && a_c > a_s) || (!is_max && a_c < a_s))
-		{
-			a_s = a_c;
-			best_move = i;
-		}
-		
-		float b_c = get_beta(child);
-		if((is_max && b_c > b_s) || (!is_max && b_c < b_s))
-		{
-			b_s = b_c;
-			best_move = i;
-		}
-	}
-	store_alpha(state, a_s);
-	store_beta(state, b_s);
-	return best_move;
-}*/
-
-/**
- * Rolls out a single path through the game tree.
- * Will never revisit a previous path due to its alpha-beta pruning
- * window.
- *//*
-int RolPar::rollout(Game game, float a, float b, int player)
-{
-	int nmoves = game.get_nmoves();
-	if(nmoves > 0)
-	{
-		vector<int> candidates = expand(game, a, b);
-		if(candidates.size() > 0)
-		{
-			int next = select(candidates);
-			game.move_to(next);
-			rollout(game, get_alpha(next), get_beta(next), -player);
-			game.undo_move();
-		}
-		return backpropagate(game, player);
-	}
-	else
-		evaluate(game);
-	return -1;
-}*/
-
-/**
- * Alpha beta with rollouts.
- * Calls rollouts until a solution has been found.
- *//*
-float RolPar::alphabeta(Game game, float a, float b, int startp, int maxdepth, int& best)
-{
-	int root = game.get_state();
-	
-	store_alpha(root, a);
-	store_beta(root, b);
-	
-	float a_r = a;
-	float b_r = b;
-	
-	while(a_r < b_r)
-	{
-		best = rollout(game, a_r, b_r, startp);
-		a_r = get_alpha(root);
-		b_r = get_beta(root);
-	}
-	
-	return b_r;
-}*/
 
 void* RolPar::new_thread(void* args)
 {
@@ -271,16 +100,6 @@ void* RolPar::new_thread(void* args)
 	delete game;
 	pthread_exit(&ret);
 }
-
-/*
-float RolPar::mt_sss(Game game, float range, int player, int depth, int& best_move)
-{
-	//TODO: adapt for parallelism
-	int root = game.get_state();
-	while(get_alpha(root) < get_beta(root))
-		alphabeta(game, get_beta(root) - range, get_beta(root), player, depth, best_move);
-	return get_alpha(root);
-}*/
 
 /**
  * Runs the alpha beta by rollouts algorithm on whatever game is linked
@@ -320,8 +139,7 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 		for(int i = 0; i < N_THREADS; i++)
 		{
 			RolPar* algorithm = new RolPar(hash_table);
-			unsigned int* seedpointer = new unsigned int(seed + i);
-			Thread_args* args = new Thread_args(algorithm, game->clone(), seedpointer);
+			Thread_args* args = new Thread_args(algorithm, game->clone(), seed + i, i);
 			
 			int ret = pthread_create(&(thread[i]), NULL, new_thread, &args);
 			printf("pthread_create returned %i for thread %i.\n", ret, i);
