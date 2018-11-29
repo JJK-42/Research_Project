@@ -67,6 +67,11 @@ bool HexGameState::operator==(const HexGameState& other) const
 
 size_t HexGameState::get_hash() const
 {
+	//size_t h_val = 0;
+	//for(size_t i = 0; i < dsboard.size(); i++)
+	//	if(dsboard[i].val != CLEAR)
+	//		h_val = h_val ^ hash_strings[dsboard[i].val - 1][i];
+	//return h_val;
 	return hash;
 }
 
@@ -289,7 +294,7 @@ int HexGameState::GetPlayoutMoves(vector<int>& moves) {
 int HexGameState::PutStone(int pos) {
     dsboard[pos].val = pjm;
     
-    hash ^= hash_strings[pjm][pos];
+    hash ^= hash_strings[pjm - 1][pos];
     //hash ^= ~hash_strings[CLEAR][pos];
     
     MakeSet(pos);
