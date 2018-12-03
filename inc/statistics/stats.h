@@ -46,10 +46,26 @@ class Statistics
 		 */
 		void record_expand(const int node);
 		
+		/**
+		 * Increments hash table entries counter
+		 */
 		void inc_ht_entry();
 		
+		/**
+		 * Increments successful lookups counter
+		 */
 		void inc_succ_lookups();
 		
+		/**
+		 * Merges this with the given stats by summing both objects'
+		 * nodes_evaluated, nodes_expanded, ht_entries, ht_succ_lookups
+		 * and by merging the times lists. (Doesn't merge traversal)
+		 */
+		void merge(Statistics* stats);
+		
+		/**
+		 * Prints hash table entries counter and succesful lookups counter
+		 */
 		void print_ht();
 		
 		/**

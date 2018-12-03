@@ -15,11 +15,11 @@ class RolPar : public Rollouts
 		
 		int run_algorithm(int argc, char** argv, Game* game);
 		
-		void set_seed(unsigned int seedpointer);
+		void set_seed(unsigned int seed);
 		
 	protected:
-		static thread_local int thread_id;
-		unsigned int seedp;
+		//static thread_local int thread_id;
+		unsigned int seed;
 		
 		Game* select(std::vector<Game*> candidates);
 		std::vector<Game*> expand(Game* game, int a, int b);

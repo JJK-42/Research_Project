@@ -71,6 +71,17 @@ void Statistics::inc_succ_lookups()
 	ht_succ_lookups++;
 }
 
+void Statistics::merge(Statistics* stats)
+{
+	nodes_evaluated += stats->nodes_evaluated;
+	nodes_expanded += stats->nodes_expanded;
+	
+	ht_entries += stats->ht_entries;
+	ht_succ_lookups += stats->ht_succ_lookups;
+	
+	times.merge(stats->times);
+}
+
 void Statistics::print_ht()
 {
 	printf("Hash table has %i new entries.\n", ht_entries);
