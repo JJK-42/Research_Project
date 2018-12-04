@@ -4,7 +4,7 @@
 //#include "algorithms/hash_table.h"
 #include "algorithms/ab_rollouts.h"
 
-const int MAX_N_THREADS = 32;
+const int MAX_N_THREADS = 128;
 
 class RolPar : public Rollouts
 {

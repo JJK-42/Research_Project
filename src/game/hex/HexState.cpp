@@ -11,6 +11,9 @@
  * Added init_zobrist
  * 
  * Modified put_stone to update hash
+ * 
+ * Made edges static. This means all instances of HexGameState will
+ * have to have the same board size (and layout)
  */
 
 #include "game/hex/HexState.h"

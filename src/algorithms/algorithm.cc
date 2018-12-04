@@ -26,12 +26,9 @@ Algorithm::Algorithm(Hashtable* htable)
 }
 
 /**
- * Algorithm destructor. Deletes stats as well.
+ * Algorithm destructor.
  */
-Algorithm::~Algorithm()
-{
-	delete stats;
-}
+Algorithm::~Algorithm(){}
 
 /**
  * Deletes hash_table and creates a new one. Does not create a new

@@ -16,7 +16,6 @@
 using namespace std;
 
 const int MT_RANGE = 10;
-const int N_THREADS = 2;
 
 /**
  * Wrapper for thread return data.
@@ -100,6 +99,8 @@ void* RolPar::new_thread(void* args)
 	
 	Move_data* ret = new Move_data(best_move, best_val, alg->stats);
 	delete game;
+	delete alg;
+	delete arguments;
 	pthread_exit(ret);
 }
 
@@ -112,9 +113,9 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 {
 	stats->reset();
 	
-	bool print = true;
-	if(argc > 1 && argv[1][0] == 'f')
-		print = false;
+	bool print = false;
+	if(argc > 1 && argv[1][0] == 't')
+		print = true;
 		
 	int seed = 0;
 	if(argc > 2)
@@ -127,32 +128,39 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 		seed = time(NULL);
 	srand(seed);
 	
-	stats->start_timer();
+	int n_threads = 2;
 	if(argc > 3)
+		n_threads = atoi(argv[3]);
+	if(n_threads > MAX_N_THREADS)
+		n_threads = MAX_N_THREADS;
+	
+	stats->start_timer();
+	if(argc > 4)
 	{
 		printf("Running MT_SSS on rollouts alpha beta* with seed %i.\n", seed);
 		winning_val = mt_sss(game, MT_RANGE, 1, -1, best_move);
 	}
 	else
 	{
-		printf("Running rollouts alpha beta with seed %i.\n", seed);
+		printf("Running parallel rollouts alpha beta with seed %i.\n", seed);
 		
-		pthread_t thread[N_THREADS];//TODO: replace n threads with cmd line arg
-		for(int i = 0; i < N_THREADS; i++)
+		pthread_t thread[MAX_N_THREADS];//TODO: replace n threads with cmd line arg
+		for(int i = 0; i < n_threads; i++)
 		{
 			RolPar* algorithm = new RolPar(hash_table);
 			Thread_args* args = new Thread_args(algorithm, game->clone(), seed + i, i);
 			
-			pthread_create(&(thread[i]), NULL, new_thread, args);
+			int ret = pthread_create(&(thread[i]), NULL, new_thread, args);
+			printf("Thread %i returned %i\n", i, ret);
 		}
-		Move_data* result[N_THREADS];
+		Move_data* result[MAX_N_THREADS];
 		
-		for(int i = 0; i < N_THREADS; i++)
+		for(int i = 0; i < n_threads; i++)
 			pthread_join(thread[i], (void**)&result[i]);
 		
 		winning_val = hash_table->get_alpha(game);
 		
-		for(int i = 0; i < N_THREADS; i++)
+		for(int i = 0; i < n_threads; i++)
 		{
 			stats->merge(result[i]->stats);
 			if(result[i]->val == winning_val)
@@ -170,7 +178,8 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 		stats->print_stats();
 		stats->print_ht();
 	}
-	delete hash_table;
+	
+	//delete hash_table;
 	
 	return 0;
 }
