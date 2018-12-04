@@ -36,6 +36,11 @@ struct Move_data
 		val = move_val;
 		stats = statistics;
 	}
+	
+	~Move_data()
+	{
+		delete stats;
+	}
 };
 
 struct Thread_args
@@ -166,6 +171,9 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 			if(result[i]->val == winning_val)
 				best_move = result[i]->id;
 		}
+		
+		for(int i = 0; i < n_threads; i++)
+			delete result[i];
 	}
 	stats->record_time();
 
