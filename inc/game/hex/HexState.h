@@ -34,6 +34,7 @@ public:
     HexGameState();
     HexGameState(int d);
     HexGameState(const HexGameState& orig);
+    HexGameState(const HexGameState* orig);
     HexGameState& operator=(const HexGameState& orig);
     HexGameState& operator =(HexGameState&& orig);
     virtual ~HexGameState();

@@ -61,7 +61,7 @@ Game* Rollouts::select(vector<Game*> candidates)
 	//path of another process' rollout. But probably better to just
 	//consider if the "evaluate" function is currently being called. Or if
 	//it is at the top of another process' rollout stack.
-	return candidates.front();
+	return candidates[rand() % candidates.size()];
 }
 
 /**
@@ -223,8 +223,7 @@ int Rollouts::run_algorithm(int argc, char** argv, Game* game)
 	int max_depth = -1;
 	if(argc > 3)
 		max_depth = atoi(argv[3]);
-	else
-		printf("WARNING: No max depth specified!\n");
+	printf("Max depth: %i\n", max_depth);
 	
 	stats->start_timer();
 	

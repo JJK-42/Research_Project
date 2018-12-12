@@ -7,6 +7,7 @@
 #include "play_game.h"
 #include "algorithms/algorithm.h"
 #include "algorithms/ab_rollouts.h"
+#include "algorithms/ab_rol_par.h"
 #include "algorithms/ab_simple.h"
 #include "game/game.h"
 
@@ -61,14 +62,14 @@ int get_move(int argc, char** argv, int player)
 int main(int argc, char** argv)
 {
 	int seed = 0;
-	if(argc > 2)
-		seed = atoi(argv[2]);
+	if(argc > 3)
+		seed = atoi(argv[3]);
 	
 	printf("Starting game with seed %i.\n", seed);
 	
 	game = new Game(seed);
 	
-	for(int i = 4; i < argc; i++)
+	for(int i = 6; i < argc; i++)
 	{
 		printf("Adding player: %s\n", argv[i]);
 		if(argv[i][0] == 'r')
@@ -80,6 +81,11 @@ int main(int argc, char** argv)
 		{
 			Alphabeta* a = new Alphabeta();
 			players.push_back(a);
+		}
+		else if(argv[i][0] == 'p')
+		{
+			RolPar* p = new RolPar();
+			players.push_back(p);
 		}
 		else
 			players.push_back(NULL);
@@ -96,8 +102,7 @@ int main(int argc, char** argv)
 	play_game(argc, argv);
 	print_win_message(game->get_winner());
 	
-	//This removed a memory leak for some reason. Weird.
-	//The actual problem might lie elsewhere...
+	//This removed a memory leak for some reason.
 	for(Algorithm* player : players)
 		if(player != NULL)
 			delete player;

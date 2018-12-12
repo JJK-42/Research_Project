@@ -57,7 +57,7 @@ bool Game::game_over()
 
 Game* Game::clone() const
 {
-	HexGameState* other_state = new HexGameState(*(HexGameState*)game_state);
+	HexGameState* other_state = new HexGameState((HexGameState*)game_state);
 	Game* other = new Game(other_state);
 	return other;
 }
@@ -119,21 +119,32 @@ int evaluate_position(HexGameState* state, int pos, int player, int dir, int max
 	int unit = 1;//(float)(max_b - max_a) / (float)(DIM * DIM);
 	if(state->get_val(pos) == player)
 	{
-		if(dir == HOR && pos < DIM)
+		bool left = pos % DIM == 0;
+		bool right = pos % DIM == DIM - 1;
+		bool top = pos < DIM;
+		bool bottom = pos >= DIM * DIM - DIM;
+		
+		if((dir == VER && (top || bottom))
+		 || (dir == HOR && (left || right)))
 			score += unit;
-		else if(dir == VER && pos % DIM == 0)
+		if((!left && !top)
+		 && state->get_val(pos - DIM - 1) == player)//pos - DIM - 1 -> top left
 			score += unit;
-		else
-		{
-			if(state->get_val(pos - dir) == player)
-				score += unit;
-			if(state->get_val(pos - DIM - 1) == player)
-				score += unit;
-			if(dir == HOR && pos >= DIM * DIM - DIM)
-				score += unit;
-			else if(dir == VER && pos % DIM == DIM - 1)
-				score += unit;
-		}
+		if((!right && !bottom)
+		 && state->get_val(pos + DIM + 1) == player)//pos + DIM + 1 -> bottom right
+			score += unit;
+		if((dir == HOR && !left)
+		 && state->get_val(pos - 1) == player)//pos - 1 -> left
+			score += unit;
+		if((dir == HOR && !right)
+		 && state->get_val(pos + 1) == player)//pos + 1 -> right
+			score += unit;
+		if((dir == VER && !top)
+		 && state->get_val(pos - DIM) == player)//pos - DIM -> top
+			score += unit;
+		if((dir == VER && !bottom)
+		 && state->get_val(pos + DIM) == player)//pos + DIM -> bottom
+			score += unit;
 	}
 	return score;
 }

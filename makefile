@@ -50,8 +50,8 @@ ab_par_hex: run_ab_par.o ab_par.o algorithm.o hash_table.o hex_game.o stats.o
 #ab_rol_par_simple: ab_rollouts_parallel.o algorithm.o simple_game.o stats.o
 #	$(CC) ab_rollouts_parallel.o algorithm.o simple_game.o stats.o -o ab_rol_par_simple $(CFLAGS)
 
-play_hex_game: play_game.o ab_simple.o ab_rollouts.o algorithm.o hex_game.o HexState.o hash_table.o stats.o
-	$(CC) play_game.o ab_simple.o ab_rollouts.o algorithm.o hex_game.o HexState.o hash_table.o stats.o -o play_hex_game $(HASHLIBS)
+play_hex_game: play_game.o ab_simple.o ab_rol_par.o ab_rollouts.o algorithm.o hex_game.o HexState.o hash_table.o stats.o
+	$(CC) play_game.o ab_simple.o ab_rol_par.o ab_rollouts.o algorithm.o hex_game.o HexState.o hash_table.o stats.o -o play_hex_game $(HASHLIBS) $(CPAR)
 
 play_simple_game: play_game.o ab_simple.o ab_rollouts.o algorithm.o simple_game.o stats.o
 	$(CC) $(CFLAGS) play_game.o ab_simple.o ab_rollouts.o algorithm.o simple_game.o stats.o -o play_simple_game $(HASHLIBS)
@@ -86,7 +86,7 @@ HexState.o: src/game/hex/HexState.cpp inc/game/hex/HexState.h inc/game/hex/Utili
 stats.o: src/statistics/stats.cc inc/statistics/stats.h
 	$(CC) $(CFLAGS) src/statistics/stats.cc $(HASHLIBS)
 
-play_game.o: src/main/play_game.cc inc/play_game.h inc/game/game.h inc/algorithms/algorithm.h inc/algorithms/ab_simple.h inc/algorithms/ab_rollouts.h
+play_game.o: src/main/play_game.cc inc/play_game.h inc/game/game.h inc/algorithms/algorithm.h inc/algorithms/ab_simple.h inc/algorithms/ab_rollouts.h inc/algorithms/ab_rol_par.h
 	$(CC) $(CFLAGS) src/main/play_game.cc $(HASHLIBS)
 
 run_ab_hex.o: src/main/run_ab_hex.cc inc/game/game.h inc/algorithms/ab_simple.h

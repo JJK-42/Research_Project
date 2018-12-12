@@ -80,6 +80,7 @@ size_t HexGameState::get_hash() const
 
 int HexGameState::get_val(int pos) const
 {
+	//printf("getting: %i\n", pos);
 	return dsboard[pos].val;
 }
 
@@ -107,6 +108,19 @@ HexGameState::HexGameState(const HexGameState& orig) {
 		
     dsboard = orig.dsboard;
     lefPos = orig.lefPos;
+
+}
+
+HexGameState::HexGameState(const HexGameState* orig) {
+		hash = orig->get_hash();
+    //dim = orig.dim;
+    //size = orig.size;
+    pjm = orig->pjm;
+    moveCounter = orig->moveCounter;
+    //edges = orig.edges;
+		
+    dsboard = orig->dsboard;
+    lefPos = orig->lefPos;
 
 }
 

@@ -49,13 +49,15 @@ struct Thread_args
 	Game* game;
 	unsigned int seed;
 	int thread_id;
+	int max_depth;
 	
-	Thread_args(RolPar* alg, Game* g, unsigned int rand_seed, int tid)
+	Thread_args(RolPar* alg, Game* g, unsigned int rand_seed, int tid, int mdepth)
 	{
 		algorithm = alg;
 		game = g;
 		seed = rand_seed;
 		thread_id = tid;
+		max_depth = mdepth;
 	}
 };
 
@@ -100,7 +102,7 @@ void* RolPar::new_thread(void* args)
 	alg->set_seed(arguments->seed);
 	
 	int best_move = -1;
-	int best_val = alg->alphabeta(game, ALPHA, BETA, 1, -1, best_move);
+	int best_val = alg->alphabeta(game, ALPHA, BETA, 1, arguments->max_depth, best_move);
 	
 	Move_data* ret = new Move_data(best_move, best_val, alg->stats);
 	delete game;
@@ -133,14 +135,20 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 		seed = time(NULL);
 	srand(seed);
 	
-	int n_threads = 2;
+	int max_depth = -1;
 	if(argc > 3)
-		n_threads = atoi(argv[3]);
-	if(n_threads > MAX_N_THREADS)
+		max_depth = atoi(argv[3]);
+	printf("Max depth: %i\n", max_depth);
+	
+	int n_threads = 2;
+	if(argc > 5)
+		n_threads = atoi(argv[5]);
+	if(n_threads > MAX_N_THREADS || n_threads <= 0)
 		n_threads = MAX_N_THREADS;
+	printf("N threads: %i\n", n_threads);
 	
 	stats->start_timer();
-	if(argc > 4)
+	if(argc > 4 && argv[4][0] == 'M')
 	{
 		printf("Running MT_SSS on rollouts alpha beta* with seed %i.\n", seed);
 		winning_val = mt_sss(game, MT_RANGE, 1, -1, best_move);
@@ -149,11 +157,11 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 	{
 		printf("Running parallel rollouts alpha beta with seed %i.\n", seed);
 		
-		pthread_t thread[MAX_N_THREADS];//TODO: replace n threads with cmd line arg
+		pthread_t thread[MAX_N_THREADS];
 		for(int i = 0; i < n_threads; i++)
 		{
 			RolPar* algorithm = new RolPar(hash_table);
-			Thread_args* args = new Thread_args(algorithm, game->clone(), seed + i, i);
+			Thread_args* args = new Thread_args(algorithm, game->clone(), seed + i, i, max_depth);
 			
 			int ret = pthread_create(&(thread[i]), NULL, new_thread, args);
 			printf("Thread %i returned %i\n", i, ret);
@@ -189,5 +197,6 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 	
 	//delete hash_table;
 	
-	return 0;
+	vector<int> moves = game->calc_moves();
+	return moves[best_move];
 }
