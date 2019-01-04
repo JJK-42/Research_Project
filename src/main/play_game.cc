@@ -105,7 +105,10 @@ int main(int argc, char** argv)
 	//This removed a memory leak for some reason.
 	for(Algorithm* player : players)
 		if(player != NULL)
+		{
+			player->delete_ht();
 			delete player;
+		}
 	
 	return 0;
 }

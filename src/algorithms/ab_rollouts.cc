@@ -173,7 +173,7 @@ int Rollouts::rollout(Game* game, int a, int b, int player, int depth)
 		return backpropagate(game, player);
 	}
 	else
-		evaluate(game);
+		return evaluate(game);
 	return -1;
 }
 

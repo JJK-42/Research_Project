@@ -175,6 +175,8 @@ int RolPar::run_algorithm(int argc, char** argv, Game* game)
 		
 		for(int i = 0; i < n_threads; i++)
 		{
+			//printf("Thread %i traversal:\n", i);
+			//result[i]->stats->print_traversal();
 			stats->merge(result[i]->stats);
 			if(result[i]->val == winning_val)
 				best_move = result[i]->id;

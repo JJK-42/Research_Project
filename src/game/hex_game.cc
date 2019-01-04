@@ -57,7 +57,7 @@ bool Game::game_over()
 
 Game* Game::clone() const
 {
-	HexGameState* other_state = new HexGameState((HexGameState*)game_state);
+	HexGameState* other_state = new HexGameState(*(HexGameState*)game_state);
 	Game* other = new Game(other_state);
 	return other;
 }

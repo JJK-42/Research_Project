@@ -110,7 +110,7 @@ HexGameState::HexGameState(const HexGameState& orig) {
     lefPos = orig.lefPos;
 
 }
-
+/*
 HexGameState::HexGameState(const HexGameState* orig) {
 		hash = orig->get_hash();
     //dim = orig.dim;
@@ -122,7 +122,7 @@ HexGameState::HexGameState(const HexGameState* orig) {
     dsboard = orig->dsboard;
     lefPos = orig->lefPos;
 
-}
+}*/
 
 HexGameState& HexGameState::operator=(const HexGameState& orig) {
     if (this == &orig) {
@@ -151,8 +151,8 @@ HexGameState& HexGameState::operator =(HexGameState&& orig){
     pjm = orig.pjm;
     moveCounter = orig.moveCounter;
     //edges = std::move(orig.edges);
-    //dsboard = std::move(orig.dsboard);
-    //lefPos = std::move(orig.lefPos);
+    dsboard = std::move(orig.dsboard);
+    lefPos = std::move(orig.lefPos);
     //edges = orig.edges;
     //dsboard = orig.dsboard;
     //lefPos = orig.lefPos;

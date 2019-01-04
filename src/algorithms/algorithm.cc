@@ -30,6 +30,11 @@ Algorithm::Algorithm(Hashtable* htable)
  */
 Algorithm::~Algorithm(){}
 
+void Algorithm::delete_ht()
+{
+	delete hash_table;
+}
+
 /**
  * Deletes hash_table and creates a new one. Does not create a new
  * stats object.

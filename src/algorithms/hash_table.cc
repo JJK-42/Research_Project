@@ -8,6 +8,8 @@
 
 using namespace std;
 
+const size_t HT_INIT_SZ = 12;
+
 static int game_comp(const Game* g1, const Game* g2, void* ctx)
 {
 	return g1 == g2;
@@ -41,15 +43,15 @@ static datatype_t dtypes = (datatype_t)
 
 Hashtable::Hashtable()
 {
-	alpha_map = ht_alloc(&dtypes, 10);
-	beta_map = ht_alloc(&dtypes, 10);
+	alpha_map = ht_alloc(&dtypes, HT_INIT_SZ);
+	beta_map = ht_alloc(&dtypes, HT_INIT_SZ);
 	stats = new Statistics();
 }
 
 Hashtable::Hashtable(Statistics* statistics)
 {
-	alpha_map = ht_alloc(&dtypes, 10);
-	beta_map = ht_alloc(&dtypes, 10);
+	alpha_map = ht_alloc(&dtypes, HT_INIT_SZ);
+	beta_map = ht_alloc(&dtypes, HT_INIT_SZ);
 	stats = statistics;
 }
 

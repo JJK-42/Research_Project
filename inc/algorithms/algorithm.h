@@ -12,6 +12,7 @@ class Algorithm
 	
 		virtual int run_algorithm(int argc, char** argv, Game* game) = 0;
 		
+		void delete_ht();
 		void clear_bounds();
 		
 	protected:
