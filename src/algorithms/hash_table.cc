@@ -8,7 +8,7 @@
 
 using namespace std;
 
-const size_t HT_INIT_SZ = 12;
+const size_t HT_INIT_SZ = 20;
 
 static int game_comp(const Game* g1, const Game* g2, void* ctx)
 {
