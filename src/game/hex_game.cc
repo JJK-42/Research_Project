@@ -15,7 +15,7 @@
 
 using namespace std;
 
-const int DIM = 3;
+const int DIM = 4;
 const int HOR = 1;
 const int VER = DIM;
 
